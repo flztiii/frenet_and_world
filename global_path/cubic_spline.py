@@ -275,6 +275,7 @@ def test():
     point_x, point_y = cubic_spline.calcPosition(sample_s)
     point_yaw = cubic_spline.calcYaw(sample_s)
     point_kappa = cubic_spline.calcKappa(sample_s)
+    point_kappa_change_rate = cubic_spline.calcKappaChangeRate(sample_s)
     estimate_distance = 0.0
     for i in range(0, len(point_x) - 1):
         estimate_distance += np.sqrt((point_x[i + 1] - point_x[i]) ** 2 + (point_y[i + 1] - point_y[i]) ** 2)
@@ -311,7 +312,14 @@ def test():
     plt.grid(True)
     plt.legend()
     plt.xlabel("line length[m]")
-    plt.ylabel("curvature [1/m]")
+    plt.ylabel("curvature [rad/m]")
+
+    plt.subplots(1)
+    plt.plot(sample_s, point_kappa_change_rate, "-r", label="curvature change rate")
+    plt.grid(True)
+    plt.legend()
+    plt.xlabel("line length[m]")
+    plt.ylabel("curvature change rate [rad/m^2]")
 
     plt.show()
 

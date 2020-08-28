@@ -298,7 +298,7 @@ def test():
     # 构建全局导航路径
     global_path = common.CPath(point_x, point_y, point_yaw, point_kappa)
     # 给定车辆初始位置
-    init_point = common.CPoint(20.0, 20.0, 1.5, 0.0)
+    init_point = common.CPoint(11.6, 10.0, 0.7, 0.3)
     # 生成局部路径
     local_path_factory = localPathPlanningFactory()
     # 第一类方法生成曲率
