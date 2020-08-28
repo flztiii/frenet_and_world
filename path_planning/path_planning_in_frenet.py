@@ -162,10 +162,11 @@ class localPathPlanningFactory:
                 offsets.append(frenet_path.points_x_[i] - global_spline.calcArcLength(current_sample))
                 if i == 0:
                     print("init corresponding_sample", init_corresponding_sample, ", corresponding_sample ", corresponding_sample)
-            # 可视化offsets
-            plt.figure()
-            plt.plot(range(0, len(offsets)), offsets)
-            plt.show()
+            if self.debug_:
+                # 可视化offsets
+                plt.figure()
+                plt.plot(range(0, len(offsets)), offsets)
+                plt.show()
 
             # 朝向的计算方法为atan(dy, dx)
             for i in range(0, len(world_path_x) - 1):
