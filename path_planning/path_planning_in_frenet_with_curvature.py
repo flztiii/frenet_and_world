@@ -3,7 +3,7 @@
 
 """
 
-本代码用于跟随全局导航路径生成局部规划路径
+本代码用于在Frenet坐标系下跟随全局导航路径生成局部规划路径
 author: flztiii
 
 """
@@ -27,7 +27,7 @@ class localPathPlanningFactory:
         pass
     
     # 生成局部路径
-    def generateLocalPath(self, global_spline, init_point, longitude_offset, lateral_offset = 0.0, method=1):
+    def generateLocalPath(self, global_spline, init_point, longitude_offset, lateral_offset = 0.0, sampling_gap = 0.1, method=1):
         '''
             global_spline为全局导航路径
             init_point为局部规划的起点
@@ -87,7 +87,7 @@ class localPathPlanningFactory:
         
         # 第三步，得到frenet系下的局部规划路径
         frenet_spline = g2_spline.G2Spline(frenet_init_point, frenet_goal_point)
-        sample_number = int((longitude_offset + lateral_offset) / 0.1)
+        sample_number = int((longitude_offset + lateral_offset) / sampling_gap)
         samples = np.linspace(0, frenet_spline.eta_, sample_number)
         frenet_path_x, frenet_path_y, frenet_path_yaw, frenet_path_curvature = [], [], [], []
         for sample in samples:
@@ -208,7 +208,7 @@ class localPathPlanningFactory:
         return sample
 
     # 将坐标从World转化到Frenet系下
-    def  __transPointToFrenet(self, global_spline, point):
+    def __transPointToFrenet(self, global_spline, point):
         # 首先计算出定位对应的sample
         init_corresponding_sample = self.__calcCorrespondingSample(global_spline, point)
 
@@ -303,7 +303,7 @@ def test():
     local_path_factory = localPathPlanningFactory()
     # 第一类方法生成曲率
     local_path_1 = local_path_factory.generateLocalPath(global_spline, init_point, 40.0)
-        # 第二类方法生成曲率
+    # 第二类方法生成曲率
     local_path_2 = local_path_factory.generateLocalPath(global_spline, init_point, 40.0, method=2)
 
     # 计算两者的曲率最大差
@@ -332,7 +332,7 @@ def test():
     fig_1_ax.set_ylabel('position[m]')
     # 添加标注
     fig_1_ax.legend([global_path_vis, local_path_vis_formula, local_path_vis_estimate], ['global path', 'local path formula', 'local path estimate'], loc='upper right')
-    # 绘制曲率随路程的变化曲线
+    # 绘制朝向随路程的变化曲线
     fig_2 = plt.figure()
     fig_2_ax = fig_2.add_subplot(1, 1, 1)
     # 可视化local_path_1的曲率随路程的变化曲线
