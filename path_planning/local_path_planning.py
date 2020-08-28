@@ -298,7 +298,7 @@ def test():
     # 构建全局导航路径
     global_path = common.CPath(point_x, point_y, point_yaw, point_kappa)
     # 给定车辆初始位置
-    init_point = common.CPoint(11.6, 10.0, 0.7, 0.3)
+    init_point = common.CPoint(12.0, 15.0, 1.0, 0.0)
     # 生成局部路径
     local_path_factory = localPathPlanningFactory()
     # 第一类方法生成曲率
@@ -313,6 +313,7 @@ def test():
             curvature_deviations.append(abs(local_path_1.points_curvature_[i] - local_path_2.points_curvature_[i]))
     max_curvature_deviation = max(curvature_deviations)
     print("max curvature deviation is ", max_curvature_deviation, ", index is ", curvature_deviations.index(max_curvature_deviation))
+    print("average curvature deviation is ", np.mean(curvature_deviations))
 
     # 可视化
     fig_1 = plt.figure()
