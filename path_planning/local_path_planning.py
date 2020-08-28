@@ -235,7 +235,7 @@ class localPathPlanningFactory:
         assert(m is not None)
 
         # 计算Frenet系坐标
-        l = arc_length
+        l = arc_length + (x - X) * np.cos(t) + (y - Y) * np.sin(t)
         r = (X - x) * np.sin(t) + (y - Y) * np.cos(t)
         assert(r * k != 1)
         theta = np.arctan2(np.sin(beta - t), np.cos(beta - t) / (1 - r * k))
@@ -271,8 +271,9 @@ class localPathPlanningFactory:
         assert(m is not None)
 
         # 计算world系坐标参数
-        x = X - r * np.sin(t)
-        y = Y + r * np.cos(t)
+        offset = l - arc_length
+        x = X - r * np.sin(t) + offset * np.cos(t)
+        y = Y + r * np.cos(t) + offset * np.sin(t)
         theta = np.arctan2(np.cos(t)*np.sin(beta)+(1 - r*k)*np.cos(beta)*np.sin(t), (1 - r*k)*np.cos(beta)*np.cos(t)-np.sin(beta)*np.sin(t))
         curvature = (alpha - r * alpha * k + k * (1 - r * k)**2 * np.cos(beta)**3 + m * r * np.cos(beta)**2 * np.sin(beta) + 2 * k * np.cos(beta) * np.sin(beta)**2) / np.power((1 - r * k)**2 * np.cos(beta)**2 + np.sin(beta)**2, 1.5)
         world_point = common.CPoint(x, y, theta, curvature)
