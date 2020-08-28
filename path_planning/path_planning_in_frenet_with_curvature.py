@@ -22,8 +22,9 @@ import global_path.cubic_spline as cubic_spline
 
 # 给定导航路径，定位信息，生成局部路径
 class localPathPlanningFactory:
-    def __init__(self):
-        self.debug_ = False;
+    def __init__(self, debug = False, ignore_curvature_change_rate = False):
+        self.debug_ = debug;
+        self.ignore_curvature_change_rate_ = ignore_curvature_change_rate;
         pass
     
     # 生成局部路径
@@ -234,6 +235,9 @@ class localPathPlanningFactory:
         assert(k is not None and k == reference_point.curvature_)
         assert(m is not None)
 
+        if self.ignore_curvature_change_rate_:
+            m = 0
+
         # 计算Frenet系坐标
         l = arc_length + (x - X) * np.cos(t) + (y - Y) * np.sin(t)
         r = (X - x) * np.sin(t) + (y - Y) * np.cos(t)
@@ -269,6 +273,9 @@ class localPathPlanningFactory:
         assert(t is not None and t == reference_point.theta_)
         assert(k is not None and k == reference_point.curvature_)
         assert(m is not None)
+
+        if self.ignore_curvature_change_rate_:
+            m = 0
 
         # 计算world系坐标参数
         offset = l - arc_length
