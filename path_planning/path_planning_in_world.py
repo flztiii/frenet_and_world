@@ -76,9 +76,10 @@ class localPathPlanningFactory:
         
         sample = 0.0
         # 进行牛顿迭代
-        while (sample >= global_spline.s_[0] and sample <= global_spline.s_[-1]) and np.abs(func(sample)) > 1e-3 and derivate(sample) != 0:
+        while np.abs(func(sample)) > 1e-3 and derivate(sample) != 0:
             sample += - func(sample) / derivate(sample)
-        sample = max(global_spline.s_[0], min(sample, global_spline.s_[-1]))
+            if (sample <= global_spline.s_[0] or sample >= global_spline.s_[-1]):
+                sample = max(global_spline.s_[0] + common.EPS, min(sample, global_spline.s_[-1] - common.EPS))
         return sample
 
 # 测试函数

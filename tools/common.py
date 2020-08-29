@@ -20,6 +20,9 @@ class Point(object):
         self.x_ = x
         self.y_ = y
 
+    def __sub__(self, point):
+        return Vector(self.x_ - point.x_, self.y_ - point.y_)
+
 # 向量
 class Vector:
     def __init__(self, x, y):
@@ -33,6 +36,10 @@ class Vector:
     # 重载减法
     def __sub__(self, vector):
         return Vector(self.x_ - vector.x_, self.y_ - vector.y_)
+
+    # 获取向量唱的
+    def value(self):
+        return sqrt(self.x_ ** 2 + self.y_ ** 2)
 
 
 # 曲率点

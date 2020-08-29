@@ -192,7 +192,6 @@ class localPathPlanningFactory:
             local_path = common.CPath(world_path_x, world_path_y, world_path_yaw, world_path_curvature)
             return local_path
 
-
     # 计算给出坐标在全局导航的对应点
     def __calcCorrespondingSample(self, global_spline, point):
         # 定义函数
@@ -204,9 +203,10 @@ class localPathPlanningFactory:
         
         sample = 0.0
         # 进行牛顿迭代
-        while (sample >= global_spline.s_[0] and sample <= global_spline.s_[-1]) and np.abs(func(sample)) > 1e-3 and derivate(sample) != 0:
+        while np.abs(func(sample)) > 1e-3 and derivate(sample) != 0:
             sample += - func(sample) / derivate(sample)
-        sample = max(global_spline.s_[0], min(sample, global_spline.s_[-1]))
+            if (sample <= global_spline.s_[0] or sample >= global_spline.s_[-1]):
+                sample = max(global_spline.s_[0] + common.EPS, min(sample, global_spline.s_[-1] - common.EPS))
         return sample
 
     # 将坐标从World转化到Frenet系下
