@@ -16,7 +16,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from math import *
 import tools.common as common
-import path_planning.g2_spline as g2_spline
 import global_path.cubic_spline as cubic_spline
 import path_planning.path_planning_in_frenet as path_planning_in_frenet
 
