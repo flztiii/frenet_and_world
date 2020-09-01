@@ -32,7 +32,7 @@ class localPathPlanningFactory:
             init_point为局部规划的起点
         '''
         # 首先验证输入的正确性
-        assert(isinstance(init_point, common.CPoint))
+        assert(isinstance(global_spline, common.Navigation) and isinstance(init_point, common.CPoint))
 
         # 第一步,找到当前定位对应的全局导航参考点
         init_corresponding_sample = self.__calcCorrespondingSample(global_spline, init_point)
