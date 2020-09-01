@@ -37,7 +37,7 @@ class CubicPolynomialWithBoundaryConstrains:
         # 计算未知参数
         self.a_ = m.transpose()[0]
         self.b_ = m.transpose()[1]
-        assert(self.calcValue(goal_s) == goal_q)
+        assert(abs(self.calcValue(goal_s) == goal_q) < common.EPS)
 
     # 计算三次多项式值
     def calcValue(self, sample):
@@ -191,7 +191,69 @@ class localPathPlanningFactory:
 
 # 测试函数
 def test():
-    pass
+    # 首先建立全局导航路径
+    # 初始化散点
+    x = [0.0, 20.0, 0.0]
+    y = [0.0, 20.0, 80.0]
+    # 初始化采样间隔
+    gap = 0.1
+    # 构建2d三次样条曲线
+    global_spline = cubic_spline.CubicSpline2D(x, y)
+    # 对2d三次样条曲线进行采样
+    sample_s = np.arange(0.0, global_spline.s_[-1], gap)
+    point_x, point_y = global_spline.calcPosition(sample_s)
+    point_yaw = global_spline.calcYaw(sample_s)
+    point_kappa = global_spline.calcKappa(sample_s)
+    # 构建全局导航路径
+    global_path = common.CPath(point_x, point_y, point_yaw, point_kappa)
+
+    # 给定车辆初始位置
+    init_point = common.CPoint(12.0, 15.0, 1.0, 0.0)
+    # 生成局部路径
+    local_path_factory = localPathPlanningFactory()
+    local_path = local_path_factory.generateLocalPath(global_spline, init_point, 40.0)
+
+    # 进行可视化
+    fig_1 = plt.figure()
+    fig_1_ax = fig_1.add_subplot(1, 1, 1)
+    fig_1_ax.axis('equal')
+    # 可视化全局导航路径
+    global_path_vis, = fig_1_ax.plot(point_x, point_y, ':')
+    # 可视化局部路径
+    local_path_vis, = fig_1_ax.plot(local_path.points_x_, local_path.points_y_)
+    # 添加网格
+    fig_1_ax.grid(b=True,which='major',axis='both',alpha= 0.5,color='skyblue',linestyle='--',linewidth=2)
+    # 添加label
+    fig_1_ax.set_xlabel('position[m]')
+    fig_1_ax.set_ylabel('position[m]')
+    # 添加标注
+    fig_1_ax.legend([global_path_vis, local_path_vis], ['global path', 'local path'], loc='upper right')
+    # 绘制朝向随路程的变化曲线
+    fig_2 = plt.figure()
+    fig_2_ax = fig_2.add_subplot(1, 1, 1)
+    # 可视化local_path的曲率随路程的变化曲线
+    local_path_yaw_vis, = fig_2_ax.plot(local_path.points_dis_, local_path.points_yaw_)
+    # 添加标注
+    fig_2_ax.legend([local_path_yaw_vis], ['yaw'], loc='upper right')
+    # 添加label
+    fig_2_ax.set_xlabel('distance[m]')
+    fig_2_ax.set_ylabel('yaw[rad]')
+    # 添加标题
+    fig_2_ax.set_title('yaw profile over distance')
+    # 绘制曲率随路程的变化曲线
+    fig_3 = plt.figure()
+    fig_3_ax = fig_3.add_subplot(1, 1, 1)
+    # 可视化local_path的曲率随路程的变化曲线
+    local_path_cur_vis, = fig_3_ax.plot(local_path.points_dis_, local_path.points_curvature_)
+    # 添加标注
+    fig_3_ax.legend([local_path_cur_vis], ['curvature'], loc='upper right')
+    # 添加label
+    fig_3_ax.set_xlabel('distance[m]')
+    fig_3_ax.set_ylabel('curvature[rad/m]')
+    # 添加标题
+    fig_3_ax.set_title('curvature profile over distance')
+    plt.show()
+
 
 if __name__ == "__main__":
     test()
