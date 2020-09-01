@@ -20,7 +20,11 @@ import global_path.cubic_spline as cubic_spline
 import path_planning.path_planning_in_frenet as path_planning_in_frenet
 import path_planning.path_planning_hanyang as path_planning_hanyang
 
+# 全局变量
+VELOCITY = 10.0  # 车辆行驶速度[m/s]
+LOCAL_PLANNING_UPDATE_FREQUENCY = 10.0  # 局部规划更新频率[Hz]
 
+# 测试函数,沿全局导航从起点行驶到终点
 def test():
     pass
 

@@ -113,7 +113,7 @@ class Spline:
         return 6.0 * self.d_[index]
 
 # 构建2d三次样条曲线
-class CubicSpline2D:
+class CubicSpline2D(common.Navigation):
     def __init__(self, x, y):
         assert len(x) == len(y)
         self.x_ = x

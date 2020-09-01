@@ -11,6 +11,7 @@ author: flztiii
 from math import *
 import numpy as np
 import copy
+import abc
 
 EPS = 1e-8
 
@@ -92,6 +93,42 @@ class Trajectory:
         self.accelerations_ = copy.deepcopy(accelerations)  # 加速度
         self.jerks_ = copy.deepcopy(jerks)  # 冲击
 
+# 全局导航
+class Navigation(abc.ABC):
+    # 计算位置
+    @abc.abstractmethod
+    def calcPosition(self, samples):
+        return NotImplemented
+    
+    # 计算朝向
+    @abc.abstractmethod
+    def calcYaw(self, samples):
+        return NotImplemented
+
+    # 计算曲率
+    @abc.abstractmethod
+    def calcKappa(self, samples):
+        return NotImplemented
+
+    # 计算曲率的变化率
+    @abc.abstractmethod
+    def calcKappaChangeRate(self, samples):
+        return NotImplemented
+    
+    # 计算采样点
+    @abc.abstractmethod
+    def calcCPoint(self, sample):
+        return NotImplemented
+
+    # 计算里程
+    @abc.abstractmethod
+    def calcArcLength(self, sample):
+        return NotImplemented
+    
+    # 给出里程计算对应采样点
+    @abc.abstractmethod
+    def arcLengthToSample(self, arc_length, init_sample = 0.0):
+        return NotImplemented
 
 # 保证弧度在-pi~pi之间
 def pi_2_pi(angle):
