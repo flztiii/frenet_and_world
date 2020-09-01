@@ -129,4 +129,4 @@ def getIndexofPath(x, y, path, last_index = 0):
     return index;
 
 if __name__ == "__main__":
-    test1()
+    pass

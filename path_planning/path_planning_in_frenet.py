@@ -35,7 +35,7 @@ class localPathPlanningFactory:
         '''
 
         # 首先验证输入的正确性
-        assert(isinstance(global_spline, cubic_spline.CubicSpline2D) and isinstance(init_point, common.CPoint))
+        assert(isinstance(init_point, common.CPoint))
         # 第一步，将init_point转化到frenet坐标系下
         frenet_init_point, init_corresponding_sample = self.__transPointToFrenet(global_spline, init_point)
         print("frenet init point is ", frenet_init_point.x_, ", ", frenet_init_point.y_)
