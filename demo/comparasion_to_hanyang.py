@@ -79,7 +79,7 @@ def show_animate(global_path, travel_recorder, planning_recorder, title):
             # 可视化路径
             plt.plot(planning_recorder[i].points_x_, planning_recorder[i].points_y_, "-r")
             # 可视化当前位置
-            plt.arrow(travel_recorder[i][j].x_, travel_recorder[i][j].y_, np.cos(travel_recorder[i][j].theta_), np.sin(travel_recorder[i][j].theta_), fc='b', ec='k', head_width=0.5, head_length=0.5)
+            plt.arrow(travel_recorder[i][j].x_, travel_recorder[i][j].y_, 0.1 * np.cos(travel_recorder[i][j].theta_), 0.1 * np.sin(travel_recorder[i][j].theta_), fc='b', ec='k', head_width=0.5, head_length=0.5)
             # 可视化窗口
             plt.xlim(travel_recorder[i][j].x_ - AREA, travel_recorder[i][j].x_ + AREA)
             plt.ylim(travel_recorder[i][j].y_ - AREA, travel_recorder[i][j].y_ + AREA)
@@ -87,6 +87,18 @@ def show_animate(global_path, travel_recorder, planning_recorder, title):
             plt.grid(b=True,which='major',axis='both',alpha= 0.5,color='skyblue',linestyle='--',linewidth=2)
             plt.pause(0.0001)
     plt.close()
+
+# 将行驶路径进行格式化
+def traveledPathFormat(traveled_path_recorder):
+    points_x, points_y, points_yaw, points_curvature = [], [], [], []
+    for i in range(0, len(traveled_path_recorder)):
+        for j in range(0, len(traveled_path_recorder[i])):
+            points_x.append(traveled_path_recorder[i][j].x_)
+            points_y.append(traveled_path_recorder[i][j].y_)
+            points_yaw.append(traveled_path_recorder[i][j].theta_)
+            points_curvature.append(traveled_path_recorder[i][j].curvature_)
+    path = common.CPath(points_x, points_y, points_yaw, points_curvature)
+    return path
 
 # 测试函数,沿全局导航从起点行驶到终点
 def test():
@@ -127,9 +139,42 @@ def test():
         # 显示动画
         show_animate(global_path, hanyang_planning_traveled_path, hanyang_planned_path_recorder, "HanYang Planning")
 
+    # 进行可视化准备
+    traveled_path_1 = traveledPathFormat(frenet_planning_traveled_path)
+    traveled_path_2 = traveledPathFormat(hanyang_planning_traveled_path)
+
     # 进行可视化
     # 可视化朝向随里程的变化
+    fig_1 = plt.figure()
+    fig_1_ax = fig_1.add_subplot(1, 1, 1)
+    # 可视化traveled_path_1的朝向随路程的变化曲线
+    traveled_path_1_yaw_vis, = fig_1_ax.plot(traveled_path_1.points_dis_, traveled_path_1.points_yaw_, 'r')
+    # 可视化traveled_path_2的朝向随路程的变化曲线
+    traveled_path_2_yaw_vis, = fig_1_ax.plot(traveled_path_2.points_dis_, traveled_path_2.points_yaw_, 'b')
+    # 添加标注
+    fig_1_ax.legend([traveled_path_1_yaw_vis, traveled_path_2_yaw_vis], ['traveled path 1 yaw', 'traveled path 2 yaw'], loc='upper right')
+    # 添加label
+    fig_1_ax.set_xlabel('distance[m]')
+    fig_1_ax.set_ylabel('yaw[rad]')
+    # 添加标题
+    fig_1_ax.set_title('yaw profile over distance')
 
+    # 可视化曲率随里程的变化曲线
+    fig_2 = plt.figure()
+    fig_2_ax = fig_2.add_subplot(1, 1, 1)
+    # 可视化traveled_path_1的曲率随路程的变化曲线
+    traveled_path_1_cur_vis, = fig_2_ax.plot(traveled_path_1.points_dis_, traveled_path_1.points_curvature_, 'r')
+    # 可视化traveled_path_2的曲率随路程的变化曲线
+    traveled_path_2_cur_vis, = fig_2_ax.plot(traveled_path_2.points_dis_, traveled_path_2.points_curvature_, 'b')
+    # 添加标注
+    fig_2_ax.legend([traveled_path_1_cur_vis, traveled_path_2_cur_vis], ['traveled path 1 curvature', 'traveled path 2 curvature'], loc='upper right')
+    # 添加label
+    fig_2_ax.set_xlabel('distance[m]')
+    fig_2_ax.set_ylabel('curvature[rad/m]')
+    # 添加标题
+    fig_2_ax.set_title('curvature profile over distance')
+
+    plt.show()
 
 if __name__ == "__main__":
     test()
