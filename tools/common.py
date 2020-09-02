@@ -129,6 +129,11 @@ class Navigation(abc.ABC):
     @abc.abstractmethod
     def arcLengthToSample(self, arc_length, init_sample = 0.0):
         return NotImplemented
+    
+    # 给出最长里程
+    @abc.abstractmethod
+    def getTotalLength(self):
+        return NotImplemented
 
 # 保证弧度在-pi~pi之间
 def pi_2_pi(angle):

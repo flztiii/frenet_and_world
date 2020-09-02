@@ -39,7 +39,7 @@ class localPathPlanningFactory:
         init_longitude_offset = global_spline.calcArcLength(init_corresponding_sample)
 
         # 第二步,找到目标点在全局导航的参考点
-        goal_reference_longitude_offset = init_longitude_offset + longitude_offset
+        goal_reference_longitude_offset = min(init_longitude_offset + longitude_offset, global_spline.getTotalLength())
         goal_reference_corresponding_sample = global_spline.arcLengthToSample(goal_reference_longitude_offset, init_corresponding_sample)
         assert(goal_reference_corresponding_sample is not None)
         goal_reference_point = global_spline.calcCPoint(goal_reference_corresponding_sample)

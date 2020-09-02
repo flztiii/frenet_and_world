@@ -29,7 +29,6 @@ class Spline:
         self.y_ = y
         # 散点数量
         self.number_ = len(x)
-        print("len", self.number_)
         # 最大下标(也是方程式的个数，参数个数)
         self.n_ = len(x) - 1
         # 中间参数
@@ -260,6 +259,10 @@ class CubicSpline2D(common.Navigation):
             sample += (arc_length - self.calcArcLength(sample)) / self.calcArcLengthDerivative(sample)
         sample = max(self.s_[0], min(sample, self.s_[-1]))
         return sample
+
+    # 给出最长里程
+    def getTotalLength(self):
+        return self.total_length_ - common.EPS
 
 # 主函数
 def test():
