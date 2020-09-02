@@ -139,6 +139,10 @@ class Navigation(abc.ABC):
 def pi_2_pi(angle):
     return (angle + pi) % (2 * pi) - pi
 
+# 高斯函数
+def gaussian(x, mu, sigma):
+    return 1 / (np.sqrt(2 * np.pi) * sigma) * np.exp(- (x - mu) ** 2 / (2 * sigma ** 2))
+
 # 坐标转化，将世界坐标系下的点转换到另一个坐标系下
 def coordinateTransform(x, y, coordinate):
     # coordinate可以是曲率点也可以是速度点

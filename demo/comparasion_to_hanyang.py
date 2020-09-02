@@ -21,11 +21,115 @@ import path_planning.path_planning_in_frenet as path_planning_in_frenet
 import path_planning.path_planning_hanyang as path_planning_hanyang
 
 # 全局变量
+VEHICLE_WIDTH = 1.8  # 车辆的宽度[m]
+VEHICLE_LENGTH = 4.5  # 车辆的长度[m]
 VELOCITY = 10.0  # 车辆行驶速度[m/s]
 LOCAL_PLANNING_UPDATE_FREQUENCY = 10.0  # 局部规划更新频率[Hz]
 ANIMATE_ON = False  # 是否播放动画
 AREA = 20.0  # 动画窗口大小
 DISTANCE_TO_GOAL_THRESHOLD = 0.1  # 判断到达终点的距离阈值
+OBSTACLE_COST_WEIGHT = 1.0  # 路径选择中障碍物损失的权重
+SMOOTH_COST_WEIGHT = 1.0  # 路径选择中平滑损失的权重
+CONSISTENCY_COST_WEIGHT = 0.0  # 路径选则中一致性损失的权重
+LATERAL_SAMPLING_GAP = 0.2  # 横向采样间隔
+LATERAL_SAMPLING_NUM = 20  # 横向采样总数量
+
+# 路径选选择器
+class PathSelector:
+    def __init__(self):
+        self.obstacle_cost_weight_ = OBSTACLE_COST_WEIGHT
+        self.smooth_cost_weight_ = SMOOTH_COST_WEIGHT
+        self.consistency_cost_weight_ = CONSISTENCY_COST_WEIGHT
+
+    # 进行路径选择
+    def select(self, path_candidates, obstacles):
+        costs = []
+        # 首先判断每一条待选路径的碰撞点
+        collision_results, collision_indexs = self.collisionCheck(path_candidates, obstacles)
+        # 判断没有碰撞的路径数量
+        no_collision_path_num = collision_results.count(0)
+
+        if no_collision_path_num == 0:
+            # 全部路径发生碰撞
+            # 最优路径就是最长路径
+            max_length_index = np.argmax(collision_indexs)
+            return max_length_index
+        else:
+            # 存在无碰撞的路径
+            # 遍历每一条路径
+            for i, path_candidate in enumerate(path_candidates):
+                if collision_results[i] == 1:
+                    # 此路径发生碰撞
+                    costs.append(float('inf'))
+                else:
+                    # 此路径没有发生碰撞
+                    # 首先计算障碍物损失
+                    obstacle_cost = self.calcObstacleCost(i, collision_results)
+                    # 其次计算平滑度损失
+                    smooth_cost = self.calcSmoothCost(path_candidate)
+                    # 最后是一致性损失,不想进行计算
+                    consistency_cost = 0.0
+                    # 进行加权求和
+                    cost = self.obstacle_cost_weight_ * obstacle_cost + self.smooth_cost_weight_ * smooth_cost + self.consistency_cost_weight_ * consistency_cost
+                    costs.append(cost)
+            # 计算损失最小的路径
+            min_cost_index = np.argmin(costs)
+            return min_cost_index
+    
+    # 碰撞检测
+    def collisionCheck(self, path_candidates, obstacles):
+        collision_index_recorder = []
+        collision_results = []
+        # 遍历每一条路径
+        for _, path in enumerate(path_candidates):
+            collision_index = -1
+            # 遍历每一个点
+            for index, point in enumerate(path):
+                # 遍历每一个障碍物
+                is_collision = False
+                for obstacle in obstacles:
+                    # 判断车辆是否与障碍物重叠
+                    x, y = common.coordinateTransform(obstacle[0], obstacle[1], point)
+                    if x < VEHICLE_LENGTH * 0.5 and x > - VEHICLE_LENGTH * 0.5 and y < VEHICLE_WIDTH * 0.5 and y > - VEHICLE_WIDTH * 0.5:
+                        # 障碍物处于车辆的矩形框内,发生碰撞
+                        is_collision = True
+                        break
+                # 判断是否发生碰撞
+                if is_collision:
+                    # 发生碰撞,记录碰撞点
+                    collision_index = index
+                    break
+            # 判断是否发生碰撞
+            if collision_index != -1:
+                # 发生碰撞
+                collision_results.append(1)
+            else:
+                # 没有发生碰撞
+                collision_results.append(0)
+            # 保存碰撞点
+            collision_index_recorder.append(collision_index)
+        return collision_results, collision_index_recorder
+
+
+    # 计算障碍物损失
+    def calcObstacleCost(self, index, collision_results):
+        # 首先确定窗口大小N
+        N = len(collision_results)
+        # 之后确认高斯参数
+        sigma = LATERAL_SAMPLING_GAP
+        collision_risk = 0.0
+        for i in range(0, len(collision_results)):
+            collision_risk += float(collision_results[i]) * common.gaussian(float(index) * LATERAL_SAMPLING_GAP,float(i) * LATERAL_SAMPLING_GAP, sigma)
+        cost = collision_risk
+        return cost
+
+    # 计算平滑度损失
+    def calcSmoothCost(self, path):
+        cost = 0.0
+        for point in path:
+            cost += point.curvature_ ** 2
+        return cost
+
 
 # 计算期望的规划距离
 def expectPlanningDistance(velocity):
