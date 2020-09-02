@@ -77,6 +77,7 @@ class localPathPlanningFactory:
 
         # 第一步, 将当前位置转化到frenet坐标系下
         frenet_init_point, init_corresponding_sample =  self.__transPointToFrenet(global_spline, init_point)
+        print("init corresponding sample: ", init_corresponding_sample)
 
         # 第二步,在frenet坐标系下进行规划
         cubic_polynomial = CubicPolynomialWithBoundaryConstrains(frenet_init_point.x_, min(frenet_init_point.x_ + longitude_offset, global_spline.getTotalLength()), frenet_init_point.y_, lateral_offset, frenet_init_point.theta_)
