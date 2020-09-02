@@ -73,7 +73,7 @@ class Spline:
     
     # 计算对应函数段
     def __getSegment(self, sample):
-        return bisect.bisect(self.x_, sample) - 1
+        return min(bisect.bisect(self.x_, sample) - 1, self.n_ - 1)
     
     # 计算位置
     def calc(self, sample):

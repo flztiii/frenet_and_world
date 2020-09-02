@@ -37,7 +37,7 @@ class CubicPolynomialWithBoundaryConstrains:
         # 计算未知参数
         self.a_ = m.transpose()[0]
         self.b_ = m.transpose()[1]
-        assert(abs(self.calcValue(goal_s) == goal_q) < common.EPS)
+        assert(abs(self.calcValue(goal_s) - goal_q) < common.EPS)
 
     # 计算三次多项式值
     def calcValue(self, sample):
