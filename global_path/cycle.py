@@ -92,16 +92,24 @@ class Cycle(common.Navigation):
     
     # 得到采样的上限
     def maxSample(self):
-        return self.start_angle_
+        return self.end_angle_
     
     # 得到采样的下限
     def minSample(self):
-        return self.end_angle_
+        return self.start_angle_
 
     # 构建曲线
     def generateSpline(self):
         self.spline_x_ = AttributeX(self.radius_, self.start_angle_, self.end_angle_)
         self.spline_y_ = AttributeY(self.radius_, self.start_angle_, self.end_angle_)
+    
+    # 获取曲线x坐标属性
+    def getXAttribute(self):
+        return self.spline_x_
+    
+    # 获取曲线y坐标信息
+    def getYAttribute(self):
+        return self.spline_y_
 
     # 验证输入正确性
     def verify(self, sample):

@@ -110,6 +110,16 @@ class Navigation(abc.ABC):
     def minSample(self):
         return NotImplemented
     
+    # 获取曲线x坐标属性
+    @abc.abstractmethod
+    def getXAttribute(self):
+        return NotImplemented
+    
+    # 获取曲线y坐标信息
+    @abc.abstractmethod
+    def getYAttribute(self):
+        return NotImplemented
+    
     # 计算位置
     @abc.abstractmethod
     def calcPosition(self, samples):

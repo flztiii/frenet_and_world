@@ -63,7 +63,7 @@ class localPathPlanningFactory:
         frenet_goal_point = common.CPoint(min(frenet_init_point.x_ + longitude_offset, global_spline.getTotalLength()), lateral_offset, 0.0, 0.0)
         # 计算目标点对应的采样
         goal_corresponding_sample = global_spline.arcLengthToSample(frenet_goal_point.x_, init_corresponding_sample)
-        assert(frenet_goal_point.x_ < global_spline.total_length_)
+        assert(frenet_goal_point.x_ < global_spline.getTotalLength())
         print("frenet goal point is ", frenet_goal_point.x_, ", ", frenet_goal_point.y_)
         # 如果是debug模式,对目标点进行可视化
         if self.debug_:

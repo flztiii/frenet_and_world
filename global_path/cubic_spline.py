@@ -139,6 +139,14 @@ class CubicSpline2D(common.Navigation):
     def minSample(self):
         return self.s_[0]
     
+    # 获取曲线x坐标属性
+    def getXAttribute(self):
+        return self.spline_x_
+    
+    # 获取曲线y坐标信息
+    def getYAttribute(self):
+        return self.spline_y_
+    
     # 构建曲线
     def generateSpline(self):
         self.spline_x_ = Spline(self.s_, self.x_)
