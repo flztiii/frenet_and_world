@@ -13,10 +13,70 @@ import os
 sys.path.append(os.getcwd())
 
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 import tools.common as common
 from collections import Iterable
 import collections
+
+
+class AttributeX:
+    def __init__(self, radius, start_angle, end_angle):
+         # 验证输入正确性
+        assert end_angle > start_angle
+        # 保存输入信息
+        self.radius_ = radius
+        self.start_angle_ = start_angle
+        self.end_angle_ = end_angle
+
+    # 验证输入正确性
+    def verify(self, sample):
+        assert sample >= self.start_angle_ and sample <= self.end_angle_
+
+    def calc(self, sample):
+        self.verify(sample)
+        return self.radius_ * np.cos(sample)
+
+    def calcd(self, sample):
+        self.verify(sample)
+        return - self.radius_ * np.sin(sample)
+
+    def calcdd(self, sample):
+        self.verify(sample)
+        return - self.radius_ * np.cos(sample)
+
+    def calcddd(self, sample):
+        self.verify(sample)
+        return self.radius_ * np.sin(sample)
+
+class AttributeY:
+    def __init__(self, radius, start_angle, end_angle):
+         # 验证输入正确性
+        assert end_angle > start_angle
+        # 保存输入信息
+        self.radius_ = radius
+        self.start_angle_ = start_angle
+        self.end_angle_ = end_angle
+
+    # 验证输入正确性
+    def verify(self, sample):
+        assert sample >= self.start_angle_ and sample <= self.end_angle_
+
+    def calc(self, sample):
+        self.verify(sample)
+        return self.radius_ * np.sin(sample)
+
+    def calcd(self, sample):
+        self.verify(sample)
+        return self.radius_ * np.cos(sample)
+
+    def calcdd(self, sample):
+        self.verify(sample)
+        return - self.radius_ * np.sin(sample)
+
+    def calcddd(self, sample):
+        self.verify(sample)
+        return - self.radius_ * np.cos(sample)
 
 class Cycle(common.Navigation):
     def __init__(self, radius, start_angle, end_angle):
@@ -26,73 +86,134 @@ class Cycle(common.Navigation):
         self.radius_ = radius
         self.start_angle_ = start_angle
         self.end_angle_ = end_angle
+        # 得到x和y坐标表达
+        self.generateSpline()
         self.total_length_ = self.calcArcLength(self.end_angle_)
     
+    # 得到采样的上限
+    def maxSample(self):
+        return self.start_angle_
+    
+    # 得到采样的下限
+    def minSample(self):
+        return self.end_angle_
+
+    # 构建曲线
+    def generateSpline(self):
+        self.spline_x_ = AttributeX(self.radius_, self.start_angle_, self.end_angle_)
+        self.spline_y_ = AttributeY(self.radius_, self.start_angle_, self.end_angle_)
+
     # 验证输入正确性
     def verify(self, sample):
         assert sample >= self.start_angle_ and sample <= self.end_angle_
-    
+
     # 计算位置
     def calcPosition(self, samples):
         if isinstance(samples, Iterable):
             x, y = [], []
             for sample in samples:
-                self.verify(sample)
-                x.append(self.radius_ * np.cos(sample))
-                y.append(self.radius_ * np.sin(sample))
+                if not self.spline_x_.calc(sample) is None:
+                    x.append(self.spline_x_.calc(sample))
+                    y.append(self.spline_y_.calc(sample))
             return x, y
         else:
-            self.verify(samples)
-            x = self.radius_ * np.cos(sample)
-            y = self.radius_ * np.sin(sample)
-            return x, y
+            sample = samples
+            if not self.spline_x_.calc(sample) is None:
+                x = self.spline_x_.calc(sample)
+                y = self.spline_y_.calc(sample)
+                return x, y
+            else:
+                return None, None
     
-     # 计算朝向
+    # 计算朝向
     def calcYaw(self, samples):
         if isinstance(samples, Iterable):
             yaws = []
             for sample in samples:
-                self.verify(sample)
-                yaw = np.arctan2(np.cos(sample), -np.sin(sample))
-                yaws.append(yaw)
+                dx = self.spline_x_.calcd(sample)
+                dy = self.spline_y_.calcd(sample)
+                if not dx is None:
+                    yaws.append(math.atan2(dy, dx))
             return yaws
         else:
-            self.verify(samples)
-            yaw = np.arctan2(np.cos(samples), -np.sin(samples))
-            return yaw
-    
+            sample = samples
+            dx = self.spline_x_.calcd(sample)
+            dy = self.spline_y_.calcd(sample)
+            if not dx is None:
+                yaw = math.atan2(dy, dx)
+                return yaw
+            else:
+                return None
+
     # 计算曲率
     def calcKappa(self, samples):
         if isinstance(samples, Iterable):
-            curvatures = []
+            kappas = []
             for sample in samples:
-                self.verify(sample)
-                curvatures.append(1.0 / self.radius_)
-            return curvatures
+                dx = self.spline_x_.calcd(sample)
+                dy = self.spline_y_.calcd(sample)
+                ddx = self.spline_x_.calcdd(sample)
+                ddy = self.spline_y_.calcdd(sample)
+                if not dx is None:
+                    kappa = (ddy * dx - ddx * dy) / ((dx ** 2 + dy ** 2)**(3 / 2))
+                    kappas.append(kappa)
+            return kappas
         else:
-            self.verify(samples)
-            curvature = 1.0 / self.radius_
-            return curvature
+            sample = samples
+            dx = self.spline_x_.calcd(sample)
+            dy = self.spline_y_.calcd(sample)
+            ddx = self.spline_x_.calcdd(sample)
+            ddy = self.spline_y_.calcdd(sample)
+            if not dx is None:
+                kappa = (ddy * dx - ddx * dy) / ((dx ** 2 + dy ** 2)**(3 / 2))
+                return kappa
+            else:
+                return None
     
     # 计算曲率的变化率
     def calcKappaChangeRate(self, samples):
         if isinstance(samples, Iterable):
-            curvature_change_rates = []
+            kappa_change_rates = []
             for sample in samples:
-                self.verify(sample)
-                curvature_change_rates.append(0.0)
-            return curvature_change_rates
+                dx = self.spline_x_.calcd(sample)
+                dy = self.spline_y_.calcd(sample)
+                ddx = self.spline_x_.calcdd(sample)
+                ddy = self.spline_y_.calcdd(sample)
+                dddx = self.spline_x_.calcddd(sample)
+                dddy = self.spline_y_.calcddd(sample)
+                if not dx is None:
+                    kappa_change_rate = (6.0 * (dy * ddx - dx * ddy) * (dx * ddx + dy * ddy) + 2.0 * (np.power(dx, 2) + np.power(dy, 2)) * (-dy * dddx + dx * dddy)) / (2.0 * np.power(np.power(dx, 2) + np.power(dy, 2), 2.5))
+                    kappa_change_rates.append(kappa_change_rate)
+            return kappa_change_rates
         else:
-            self.verify(samples)
-            curvature_change_rate = 0.0
-            return curvature_change_rate
+            sample = samples
+            dx = self.spline_x_.calcd(sample)
+            dy = self.spline_y_.calcd(sample)
+            ddx = self.spline_x_.calcdd(sample)
+            ddy = self.spline_y_.calcdd(sample)
+            dddx = self.spline_x_.calcddd(sample)
+            dddy = self.spline_y_.calcddd(sample)
+            if not dx is None:
+                kappa_change_rate = (6.0 * (dy * ddx - dx * ddy) * (dx * ddx + dy * ddy) + 2.0 * (np.power(dx, 2) + np.power(dy, 2)) * (-dy * dddx + dx * dddy)) / (2.0 * np.power(np.power(dx, 2) + np.power(dy, 2), 2.5))
+                return kappa_change_rate
+            else:
+                return None
     
     # 计算采样点
     def calcCPoint(self, sample):
-        x, y = self.calcPosition(sample)
-        yaw = self.calcYaw(sample)
-        curvature = self.calcKappa(sample)
-        cpoint = common.CPoint(x, y, yaw, curvature)
+        if not self.spline_x_.calc(sample) is None:
+            x = self.spline_x_.calc(sample)
+            y = self.spline_y_.calc(sample)
+            dx = self.spline_x_.calcd(sample)
+            dy = self.spline_y_.calcd(sample)
+            ddx = self.spline_x_.calcdd(sample)
+            ddy = self.spline_y_.calcdd(sample)
+            yaw = math.atan2(dy, dx)
+            kappa = (ddy * dx - ddx * dy) / ((dx ** 2 + dy ** 2)**(3 / 2))
+            point = common.CPoint(x, y, yaw, kappa)
+            return point
+        else:
+            return None
     
     # 计算里程
     def calcArcLength(self, sample):
@@ -117,6 +238,7 @@ def test():
     points_x, points_y = cycle.calcPosition(samples)
     points_yaw = cycle.calcYaw(samples)
     points_curvature = cycle.calcKappa(samples)
+    points_curvature_change_rate = cycle.calcKappaChangeRate(samples)
     points_dis = []
     for sample in samples:
         points_dis.append(cycle.calcArcLength(sample))
@@ -132,6 +254,16 @@ def test():
     fig2 = plt.figure()
     ax2 = fig2.add_subplot(1, 1, 1)
     ax2.plot(points_dis, points_yaw)
+
+    # 可视化曲率随里程变化
+    fig3 = plt.figure()
+    ax3 = fig3.add_subplot(1, 1, 1)
+    ax3.plot(points_dis, points_curvature)
+
+    # 可视化曲率变化率随里程变化
+    fig4 = plt.figure()
+    ax4 = fig4.add_subplot(1, 1, 1)
+    ax4.plot(points_dis, points_curvature_change_rate)
 
     plt.show()
 

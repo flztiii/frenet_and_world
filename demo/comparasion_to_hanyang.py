@@ -236,7 +236,7 @@ def test():
     # 采样间隔
     gap = 0.1
     # 对2d三次样条曲线进行采样
-    sample_s = np.arange(0.0, global_spline.s_[-1], gap)
+    sample_s = np.arange(0.0, global_spline.maxSample(), gap)
     point_x, point_y = global_spline.calcPosition(sample_s)
     point_yaw = global_spline.calcYaw(sample_s)
     point_kappa = global_spline.calcKappa(sample_s)
@@ -247,8 +247,8 @@ def test():
     obstacles = np.array([[7.7, 4.0], [10.0, 5.6], [16.7, 15.0], [18.3, 18.1], [13.5, 32.2], [10.2, 34.2]])
 
     # 给出起始位置和目标点
-    init_point = global_spline.calcCPoint(global_spline.s_[0])
-    goal_point = global_spline.calcCPoint(global_spline.s_[-1] - common.EPS)
+    init_point = global_spline.calcCPoint(global_spline.minSample())
+    goal_point = global_spline.calcCPoint(global_spline.maxSample() - common.EPS)
 
     # 进行局部规划
     frenet_local_path_planner = path_planning_in_frenet.localPathPlanningFactory()

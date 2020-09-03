@@ -45,7 +45,7 @@ class localPathPlanningFactory:
             # 初始化采样间隔
             gap = 0.1
             # 对2d三次样条曲线进行采样
-            sample_s = np.arange(0.0, global_spline.s_[-1], gap)
+            sample_s = np.arange(0.0, global_spline.maxSample(), gap)
             point_x, point_y = global_spline.calcPosition(sample_s)
             point_yaw = global_spline.calcYaw(sample_s)
             point_kappa = global_spline.calcKappa(sample_s)
@@ -72,7 +72,7 @@ class localPathPlanningFactory:
             # 初始化采样间隔
             gap = 0.1
             # 对2d三次样条曲线进行采样
-            sample_s = np.arange(0.0, global_spline.s_[-1], gap)
+            sample_s = np.arange(0.0, global_spline.maxSample(), gap)
             point_x, point_y = global_spline.calcPosition(sample_s)
             point_yaw = global_spline.calcYaw(sample_s)
             point_kappa = global_spline.calcKappa(sample_s)
@@ -105,7 +105,7 @@ class localPathPlanningFactory:
             # 初始化采样间隔
             gap = 0.1
             # 对2d三次样条曲线进行采样
-            sample_s = np.arange(0.0, global_spline.s_[-1], gap)
+            sample_s = np.arange(0.0, global_spline.maxSample(), gap)
             point_x, point_y = global_spline.calcPosition(sample_s)
             point_yaw = global_spline.calcYaw(sample_s)
             point_kappa = global_spline.calcKappa(sample_s)
@@ -205,8 +205,8 @@ class localPathPlanningFactory:
         # 进行牛顿迭代
         while np.abs(func(sample)) > 1e-3 and derivate(sample) != 0:
             sample += - func(sample) / derivate(sample)
-            if (sample <= global_spline.s_[0] or sample >= global_spline.s_[-1]):
-                sample = max(global_spline.s_[0] + common.EPS, min(sample, global_spline.s_[-1] - common.EPS))
+            if (sample <= global_spline.minSample() or sample >= global_spline.maxSample()):
+                sample = max(global_spline.minSample() + common.EPS, min(sample, global_spline.maxSample() - common.EPS))
         return sample
 
     # 将坐标从World转化到Frenet系下
@@ -299,7 +299,7 @@ def test():
     # 构建2d三次样条曲线
     global_spline = cubic_spline.CubicSpline2D(x, y)
     # 对2d三次样条曲线进行采样
-    sample_s = np.arange(0.0, global_spline.s_[-1], gap)
+    sample_s = np.arange(0.0, global_spline.maxSample(), gap)
     point_x, point_y = global_spline.calcPosition(sample_s)
     point_yaw = global_spline.calcYaw(sample_s)
     point_kappa = global_spline.calcKappa(sample_s)

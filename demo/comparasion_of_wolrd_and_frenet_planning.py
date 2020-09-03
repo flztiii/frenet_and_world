@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from math import *
 import tools.common as common
-import global_path.cubic_spline as cubic_spline
+import global_path.cycle as cycle
 import path_planning.path_planning_in_frenet as path_planning_in_frenet
 import path_planning.path_planning_in_world as path_planning_in_world
 
@@ -33,21 +33,23 @@ def calcCorrespondingSample(global_spline, point, init_sample = 0.0):
     # 进行牛顿迭代
     while np.abs(func(sample)) > 1e-3 and derivate(sample) != 0:
         sample += - func(sample) / derivate(sample)
-        if (sample <= global_spline.s_[0] or sample >= global_spline.s_[-1]):
-            sample = max(global_spline.s_[0] + common.EPS, min(sample, global_spline.s_[-1] - common.EPS))
+        if (sample <= global_spline.minSample() or sample >= global_spline.maxSample()):
+            sample = max(global_spline.minSample() + common.EPS, min(sample, global_spline.maxSample() - common.EPS))
     return sample
 
 # 测试在frenet系和world系进行规划的差异
 def test():
-    # 首先给出全局导航路点
-    waypoints_x = [0.0, 20.0, 0.0]
-    waypoints_y = [0.0, 20.0, 80.0]
+    # 首先给出全局导航
+    radius = 15.0
+    start_angle = - np.pi * 0.5
+    end_angle = np.pi * 0.5
     # 初始化采样间隔
-    gap = 0.1
-    # 构建2d三次样条曲线
-    global_spline = cubic_spline.CubicSpline2D(waypoints_x, waypoints_y)
-    # 对2d三次样条曲线进行采样
-    sample_s = np.arange(0.0, global_spline.s_[-1], gap)
+    gap = 0.05
+    # 构建导航曲线
+    global_spline = cycle.Cycle(radius, start_angle, end_angle)
+    # 对导航曲线进行采样
+    sample_number = int((end_angle - start_angle) / gap)
+    sample_s = np.linspace(start_angle, end_angle - common.EPS, sample_number)
     point_x, point_y = global_spline.calcPosition(sample_s)
     point_yaw = global_spline.calcYaw(sample_s)
     point_kappa = global_spline.calcKappa(sample_s)
@@ -60,7 +62,7 @@ def test():
     local_path_planner_in_world = path_planning_in_world.localPathPlanningFactory()
 
     # 给出起始点
-    init_point = common.CPoint(20.0, 20.0, 0.0, 0.0)
+    init_point = global_path.path_[0]
 
     # 记录不同的规划长度
     planning_distances = []

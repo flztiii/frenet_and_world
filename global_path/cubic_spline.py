@@ -125,14 +125,22 @@ class CubicSpline2D(common.Navigation):
         self.s_ = [0.0]
         self.s_.extend(np.cumsum(ds))
         # 开始构建曲线
-        self.__generateSpline()
+        self.generateSpline()
         # 生成里程查询表
         self.arc_length_checking_table_ = self.__generateArcLengthCheckingTable()
         # 得到总弧长
         self.total_length_ = self.calcArcLength(self.s_[-1])
     
+    # 得到采样的上限
+    def maxSample(self):
+        return self.s_[-1]
+    
+    # 得到采样的下限
+    def minSample(self):
+        return self.s_[0]
+    
     # 构建曲线
-    def __generateSpline(self):
+    def generateSpline(self):
         self.spline_x_ = Spline(self.s_, self.x_)
         self.spline_y_ = Spline(self.s_, self.y_)
     

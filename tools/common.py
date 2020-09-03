@@ -95,6 +95,21 @@ class Trajectory:
 
 # 全局导航
 class Navigation(abc.ABC):
+    # 构建曲线
+    @abc.abstractmethod
+    def generateSpline(self):
+        return NotImplemented
+    
+    # 得到采样的上限
+    @abc.abstractmethod
+    def maxSample(self):
+        return NotImplemented
+    
+    # 得到采样的下限
+    @abc.abstractmethod
+    def minSample(self):
+        return NotImplemented
+    
     # 计算位置
     @abc.abstractmethod
     def calcPosition(self, samples):

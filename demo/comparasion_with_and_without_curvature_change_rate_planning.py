@@ -29,7 +29,7 @@ def test():
     # 构建2d三次样条曲线
     global_spline = cubic_spline.CubicSpline2D(waypoints_x, waypoints_y)
     # 对2d三次样条曲线进行采样
-    sample_s = np.arange(0.0, global_spline.s_[-1], gap)
+    sample_s = np.arange(0.0, global_spline.maxSample(), gap)
     point_x, point_y = global_spline.calcPosition(sample_s)
     point_yaw = global_spline.calcYaw(sample_s)
     point_kappa = global_spline.calcKappa(sample_s)
