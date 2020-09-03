@@ -19,6 +19,7 @@ import bisect
 import tools.common as common
 from scipy import integrate
 from collections import Iterable
+import collections
 
 # 构建三次样条曲线
 class Spline:
@@ -125,6 +126,8 @@ class CubicSpline2D(common.Navigation):
         self.s_.extend(np.cumsum(ds))
         # 开始构建曲线
         self.__generateSpline()
+        # 生成里程查询表
+        self.arc_length_checking_table_ = self.__generateArcLengthCheckingTable()
         # 得到总弧长
         self.total_length_ = self.calcArcLength(self.s_[-1])
     
@@ -248,8 +251,33 @@ class CubicSpline2D(common.Navigation):
     
     # 计算里程
     def calcArcLength(self, sample):
-        arc_length = integrate.quad(self.calcArcLengthDerivative, 0.0, sample)[0]
+        # 判断查询字典是否存在
+        if hasattr(self, 'arc_length_checking_table_'):
+            # 查询字典存在
+            # 首先对字典进行查询
+            init_index = int(sample / 0.1)
+            while list(self.arc_length_checking_table_.keys())[init_index] >= sample:
+                if init_index == 0:
+                    break
+                else:
+                    init_index -= 1
+            last_sample = list(self.arc_length_checking_table_.keys())[init_index]
+            arc_length = self.arc_length_checking_table_[last_sample] + integrate.quad(self.calcArcLengthDerivative, last_sample, sample)[0]
+        else:
+            # 查询字典不存在
+            arc_length = integrate.quad(self.calcArcLengthDerivative, 0.0, sample)[0]
         return arc_length
+
+    # 生成路程查询表
+    def __generateArcLengthCheckingTable(self):
+        arc_length_checking_table = collections.OrderedDict()
+        gap = 0.1
+        sample_number = int((self.s_[-1] - self.s_[0]) / gap) + 1
+        samples = np.linspace(self.s_[0], self.s_[-1] - common.EPS, sample_number)
+        for sample in samples:
+            arc_length = self.calcArcLength(sample)
+            arc_length_checking_table[sample] = arc_length
+        return arc_length_checking_table
     
     # 给出里程计算对应采样点
     def arcLengthToSample(self, arc_length, init_sample = 0.0):
@@ -267,8 +295,8 @@ class CubicSpline2D(common.Navigation):
 # 主函数
 def test():
     # 初始化散点
-    x = [0.0, 2.5, 5.0, 0.0]
-    y = [0.0, 0.0, 5.0, 10.0]
+    x = [0.0, 20.0, 0.0]
+    y = [0.0, 20.0, 40.0]
     # 初始化采样间隔
     gap = 0.1
     # 构建2d三次样条曲线
