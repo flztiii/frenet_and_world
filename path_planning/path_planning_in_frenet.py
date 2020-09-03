@@ -63,7 +63,7 @@ class localPathPlanningFactory:
         frenet_goal_point = common.CPoint(min(frenet_init_point.x_ + longitude_offset, global_spline.getTotalLength()), lateral_offset, 0.0, 0.0)
         # 计算目标点对应的采样
         goal_corresponding_sample = global_spline.arcLengthToSample(frenet_goal_point.x_, init_corresponding_sample)
-        assert(frenet_goal_point.x_ < global_spline.getTotalLength())
+        assert(frenet_goal_point.x_ <= global_spline.getTotalLength())
         print("frenet goal point is ", frenet_goal_point.x_, ", ", frenet_goal_point.y_)
         # 如果是debug模式,对目标点进行可视化
         if self.debug_:
@@ -196,10 +196,10 @@ class localPathPlanningFactory:
     def __calcCorrespondingSample(self, global_spline, point):
         # 定义函数
         def func(sample):
-            return 2 * (global_spline.spline_x_.calc(sample) - point.x_) * global_spline.spline_x_.calcd(sample) + 2 * (global_spline.spline_y_.calc(sample) - point.y_) * global_spline.spline_y_.calcd(sample)
+            return 2 * (global_spline.getXAttribute().calc(sample) - point.x_) * global_spline.getXAttribute().calcd(sample) + 2 * (global_spline.getYAttribute().calc(sample) - point.y_) * global_spline.getYAttribute().calcd(sample)
         # 定义导数
         def derivate(sample):
-            return 2 * (global_spline.spline_x_.calc(sample) - point.x_) * global_spline.spline_x_.calcdd(sample) + 2.0 * np.power(global_spline.spline_x_.calcd(sample), 2) + 2 * (global_spline.spline_y_.calc(sample) - point.y_) * global_spline.spline_y_.calcdd(sample) + 2.0 * np.power(global_spline.spline_y_.calcd(sample), 2)
+            return 2 * (global_spline.getXAttribute().calc(sample) - point.x_) * global_spline.getXAttribute().calcdd(sample) + 2.0 * np.power(global_spline.getXAttribute().calcd(sample), 2) + 2 * (global_spline.getYAttribute().calc(sample) - point.y_) * global_spline.getYAttribute().calcdd(sample) + 2.0 * np.power(global_spline.getYAttribute().calcd(sample), 2)
         
         sample = 0.0
         # 进行牛顿迭代

@@ -176,10 +176,10 @@ class localPathPlanningFactory:
     def __calcCorrespondingSample(self, global_spline, point):
         # 定义函数
         def func(sample):
-            return 2 * (global_spline.spline_x_.calc(sample) - point.x_) * global_spline.spline_x_.calcd(sample) + 2 * (global_spline.spline_y_.calc(sample) - point.y_) * global_spline.spline_y_.calcd(sample)
+            return 2 * (global_spline.getXAttribute().calc(sample) - point.x_) * global_spline.getXAttribute().calcd(sample) + 2 * (global_spline.getYAttribute().calc(sample) - point.y_) * global_spline.getYAttribute().calcd(sample)
         # 定义导数
         def derivate(sample):
-            return 2 * (global_spline.spline_x_.calc(sample) - point.x_) * global_spline.spline_x_.calcdd(sample) + 2.0 * np.power(global_spline.spline_x_.calcd(sample), 2) + 2 * (global_spline.spline_y_.calc(sample) - point.y_) * global_spline.spline_y_.calcdd(sample) + 2.0 * np.power(global_spline.spline_y_.calcd(sample), 2)
+            return 2 * (global_spline.getXAttribute().calc(sample) - point.x_) * global_spline.getXAttribute().calcdd(sample) + 2.0 * np.power(global_spline.getXAttribute().calcd(sample), 2) + 2 * (global_spline.getYAttribute().calc(sample) - point.y_) * global_spline.getYAttribute().calcdd(sample) + 2.0 * np.power(global_spline.getYAttribute().calcd(sample), 2)
         
         sample = 0.0
         # 进行牛顿迭代

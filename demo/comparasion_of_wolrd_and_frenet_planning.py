@@ -24,10 +24,10 @@ import path_planning.path_planning_in_world as path_planning_in_world
 def calcCorrespondingSample(global_spline, point, init_sample = 0.0):
     # 定义函数
     def func(sample):
-        return 2 * (global_spline.spline_x_.calc(sample) - point.x_) * global_spline.spline_x_.calcd(sample) + 2 * (global_spline.spline_y_.calc(sample) - point.y_) * global_spline.spline_y_.calcd(sample)
+        return 2 * (global_spline.getXAttribute().calc(sample) - point.x_) * global_spline.getXAttribute().calcd(sample) + 2 * (global_spline.getYAttribute().calc(sample) - point.y_) * global_spline.getYAttribute().calcd(sample)
     # 定义导数
     def derivate(sample):
-        return 2 * (global_spline.spline_x_.calc(sample) - point.x_) * global_spline.spline_x_.calcdd(sample) + 2.0 * np.power(global_spline.spline_x_.calcd(sample), 2) + 2 * (global_spline.spline_y_.calc(sample) - point.y_) * global_spline.spline_y_.calcdd(sample) + 2.0 * np.power(global_spline.spline_y_.calcd(sample), 2)
+        return 2 * (global_spline.getXAttribute().calc(sample) - point.x_) * global_spline.getXAttribute().calcdd(sample) + 2.0 * np.power(global_spline.getXAttribute().calcd(sample), 2) + 2 * (global_spline.getYAttribute().calc(sample) - point.y_) * global_spline.getYAttribute().calcdd(sample) + 2.0 * np.power(global_spline.getYAttribute().calcd(sample), 2)
     
     sample = init_sample
     # 进行牛顿迭代
@@ -73,7 +73,7 @@ def test():
     planning_in_frenet_avg_deviations = []
     planning_in_world_avg_deviations = []
     # 遍历规划期望距离
-    for expected_planning_distance in np.linspace(5.0, 50.0, 45):
+    for expected_planning_distance in np.linspace(4.0, 30.0, 50):
         # 记录不同的规划长度
         planning_distances.append(expected_planning_distance)
         # 进行规划
@@ -122,7 +122,7 @@ def test():
         plt.ylabel('position[m]')
         # 添加标注
         plt.legend([global_path_vis, planned_path_in_frenet_vis, planned_path_in_world_vis], ['global path', 'local path planned in Frenet', 'local path planned in World'], loc='upper right')
-        plt.pause(0.01)
+        plt.pause(0.1)
 
     # 进行误差的对比
     plt.figure()
