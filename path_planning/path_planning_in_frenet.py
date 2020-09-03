@@ -293,7 +293,7 @@ def test():
     # 首先建立全局导航路径
     # 初始化散点
     x = [0.0, 20.0, 0.0]
-    y = [0.0, 20.0, 80.0]
+    y = [0.0, 20.0, 40.0]
     # 初始化采样间隔
     gap = 0.1
     # 构建2d三次样条曲线
@@ -306,13 +306,13 @@ def test():
     # 构建全局导航路径
     global_path = common.CPath(point_x, point_y, point_yaw, point_kappa)
     # 给定车辆初始位置
-    init_point = common.CPoint(12.0, 15.0, 1.0, 0.0)
+    init_point = common.CPoint(21.7, 14.8, 1.5, 0.0)
     # 生成局部路径
-    local_path_factory = localPathPlanningFactory()
+    local_path_factory = localPathPlanningFactory(False, False)
     # 第一类方法生成曲率
-    local_path_1 = local_path_factory.generateLocalPath(global_spline, init_point, 40.0)
+    local_path_1 = local_path_factory.generateLocalPath(global_spline, init_point, 40.0, 3.0)
     # 第二类方法生成曲率
-    local_path_2 = local_path_factory.generateLocalPath(global_spline, init_point, 40.0, method=2)
+    local_path_2 = local_path_factory.generateLocalPath(global_spline, init_point, 40.0, 3.0, method=2)
 
     # 计算两者的曲率最大差
     curvature_deviations = []
