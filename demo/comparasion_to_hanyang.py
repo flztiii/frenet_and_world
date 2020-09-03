@@ -31,8 +31,8 @@ DISTANCE_TO_GOAL_THRESHOLD = 0.1  # 判断到达终点的距离阈值
 OBSTACLE_COST_WEIGHT = 1.0  # 路径选择中障碍物损失的权重
 SMOOTH_COST_WEIGHT = 1.0  # 路径选择中平滑损失的权重
 CONSISTENCY_COST_WEIGHT = 0.0  # 路径选则中一致性损失的权重
-LATERAL_SAMPLING_GAP = 0.3  # 横向采样间隔
-LATERAL_SAMPLING_NUM = 10  # 横向采样总数量
+LATERAL_SAMPLING_GAP = 0.2  # 横向采样间隔
+LATERAL_SAMPLING_NUM = 20  # 横向采样总数量
 
 # 路径选选择器
 class PathSelector:
@@ -116,7 +116,7 @@ class PathSelector:
         # 首先确定窗口大小N
         N = len(collision_results)
         # 之后确认高斯参数
-        sigma = LATERAL_SAMPLING_GAP
+        sigma = LATERAL_SAMPLING_GAP * 2
         collision_risk = 0.0
         for i in range(0, len(collision_results)):
             collision_risk += float(collision_results[i]) * common.gaussian(float(index) * LATERAL_SAMPLING_GAP,float(i) * LATERAL_SAMPLING_GAP, sigma)
@@ -187,7 +187,7 @@ def PlanningProcess(global_spline, init_point, goal_point, local_path_planner, o
     return traveling_recorder, planned_path_recorder, path_candidates_recorder
 
 # 显示规划过程动画
-def show_animate(global_path, travel_recorder, planning_recorder, path_candidates_recorder, title):
+def show_animate(global_path, obstacles, travel_recorder, planning_recorder, path_candidates_recorder, title):
     # 验证输入正确性
     assert(len(travel_recorder) == len(planning_recorder) and len(travel_recorder) == len(path_candidates_recorder))
     # 开始显示动画
@@ -197,6 +197,8 @@ def show_animate(global_path, travel_recorder, planning_recorder, path_candidate
             plt.axis('equal')
             # 可视化全局导航
             plt.plot(global_path.points_x_, global_path.points_y_, ":")
+            # 可视化障碍物点
+            plt.plot(obstacles.transpose()[0], obstacles.transpose()[1], "xk")
             # 可视化待选路径组
             for path in path_candidates_recorder[i]:
                 plt.plot(path.points_x_, path.points_y_, "b")
@@ -242,7 +244,7 @@ def test():
     global_path = common.CPath(point_x, point_y, point_yaw, point_kappa)
 
     # 给出障碍物列表
-    obstacles = np.array([[5.0, 5.0], [10.0, 10.0]])
+    obstacles = np.array([[7.7, 4.0], [10.0, 5.6], [16.7, 15.0], [18.3, 18.1], [13.5, 32.2], [10.2, 34.2]])
 
     # 给出起始位置和目标点
     init_point = global_spline.calcCPoint(global_spline.s_[0])
@@ -255,7 +257,7 @@ def test():
     # 判断是否显示动画
     if ANIMATE_ON:
         # 显示动画
-        show_animate(global_path, frenet_planning_traveled_path, frenet_planned_path_recorder, frenet_path_candidates_recorder, "Frenet Planning")
+        show_animate(global_path, obstacles, frenet_planning_traveled_path, frenet_planned_path_recorder, frenet_path_candidates_recorder, "Frenet Planning")
 
     # 利用汉阳大学2012年规划方法进行局部规划
     hanyang_local_path_planner = path_planning_hanyang.localPathPlanningFactory()
@@ -264,7 +266,7 @@ def test():
     # 判断是否显示动画
     if ANIMATE_ON:
         # 显示动画
-        show_animate(global_path, hanyang_planning_traveled_path, hanyang_planned_path_recorder, hanyang_path_candidates_recorder, "HanYang Planning")
+        show_animate(global_path, obstacles, hanyang_planning_traveled_path, hanyang_planned_path_recorder, hanyang_path_candidates_recorder, "HanYang Planning")
 
     # 进行可视化准备
     traveled_path_1 = traveledPathFormat(frenet_planning_traveled_path)
