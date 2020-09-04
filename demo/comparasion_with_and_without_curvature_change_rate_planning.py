@@ -17,6 +17,7 @@ import numpy as np
 from math import *
 import tools.common as common
 import global_path.cubic_spline as cubic_spline
+import global_path.quartic_spline as quartic_spline
 import path_planning.path_planning_in_frenet as path_planning_in_frenet
 
 # 利用插值进行全局导航曲线生成
@@ -27,7 +28,7 @@ def test():
     # 初始化采样间隔
     gap = 0.1
     # 构建2d三次样条曲线
-    global_spline = cubic_spline.CubicSpline2D(waypoints_x, waypoints_y)
+    global_spline = quartic_spline.QuarticSpline2D(waypoints_x, waypoints_y)
     # 对2d三次样条曲线进行采样
     sample_s = np.arange(0.0, global_spline.maxSample(), gap)
     point_x, point_y = global_spline.calcPosition(sample_s)

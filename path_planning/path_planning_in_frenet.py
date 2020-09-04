@@ -19,6 +19,7 @@ import time
 import tools.common as common
 import path_planning.g2_spline as g2_spline
 import global_path.cubic_spline as cubic_spline
+import global_path.quartic_spline as quartic_spline
 
 # 给定导航路径，定位信息，生成局部路径
 class localPathPlanningFactory:
@@ -297,7 +298,7 @@ def test():
     # 初始化采样间隔
     gap = 0.1
     # 构建2d三次样条曲线
-    global_spline = cubic_spline.CubicSpline2D(x, y)
+    global_spline = quartic_spline.QuarticSpline2D(x, y)
     # 对2d三次样条曲线进行采样
     sample_s = np.arange(0.0, global_spline.maxSample(), gap)
     point_x, point_y = global_spline.calcPosition(sample_s)
@@ -306,13 +307,13 @@ def test():
     # 构建全局导航路径
     global_path = common.CPath(point_x, point_y, point_yaw, point_kappa)
     # 给定车辆初始位置
-    init_point = common.CPoint(21.7, 14.8, 1.5, 0.0)
+    init_point = common.CPoint(15.0, 9.5, 1.0, 0.0)
     # 生成局部路径
     local_path_factory = localPathPlanningFactory(False, False)
     # 第一类方法生成曲率
-    local_path_1 = local_path_factory.generateLocalPath(global_spline, init_point, 40.0, 3.0)
+    local_path_1 = local_path_factory.generateLocalPath(global_spline, init_point, 40.0, 0.0)
     # 第二类方法生成曲率
-    local_path_2 = local_path_factory.generateLocalPath(global_spline, init_point, 40.0, 3.0, method=2)
+    local_path_2 = local_path_factory.generateLocalPath(global_spline, init_point, 40.0, 0.0, method=2)
 
     # 计算两者的曲率最大差
     curvature_deviations = []
