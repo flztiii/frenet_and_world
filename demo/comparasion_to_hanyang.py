@@ -294,7 +294,7 @@ def test():
     # 进行可视化
     # 可视化行驶路径
     fig_0 = plt.figure(figsize=(3.45,2))
-    fig_0.subplots_adjust(left=0.28, right=0.98, bottom=0.28, top=0.98)
+    fig_0.subplots_adjust(left=0.12, right=0.98, bottom=0.18, top=0.96)
     fig_0_ax = fig_0.add_subplot(1, 1, 1)
     fig_0_ax.axis('equal')
     # 可视化全局导航路径
@@ -304,7 +304,7 @@ def test():
     # 可视化局部路径(hanyang)
     traveled_path_2_vis, = fig_0_ax.plot(traveled_path_2.points_x_, traveled_path_2.points_y_)
     # 可视化障碍物点
-    obstacles_vis, = fig_0_ax.plot(obstacles.transpose()[0], obstacles.transpose()[1], "xk", markersize=0.8)
+    obstacles_vis, = fig_0_ax.plot(obstacles.transpose()[0], obstacles.transpose()[1], "xk", markersize=2)
     # 添加网格
     fig_0_ax.grid(b=True,which='major',axis='both',alpha= 0.5,color='skyblue',linestyle='--',linewidth=0.6)
     # 添加label
@@ -315,7 +315,7 @@ def test():
 
     # 可视化朝向随里程的变化
     fig_1 = plt.figure(figsize=(3.45,1.6))
-    fig_1.subplots_adjust(left=0.28, right=0.98, bottom=0.28, top=0.98)
+    fig_1.subplots_adjust(left=0.12, right=0.98, bottom=0.24, top=0.96)
     fig_1_ax = fig_1.add_subplot(1, 1, 1)
     # 可视化traveled_path_1的朝向随路程的变化曲线
     traveled_path_1_yaw_vis, = fig_1_ax.plot(traveled_path_1.points_dis_, traveled_path_1.points_yaw_, 'r')
@@ -331,7 +331,7 @@ def test():
 
     # 可视化曲率随里程的变化曲线
     fig_2 = plt.figure(figsize=(3.45,1.6))
-    fig_2.subplots_adjust(left=0.28, right=0.98, bottom=0.28, top=0.98)
+    fig_2.subplots_adjust(left=0.15, right=0.98, bottom=0.24, top=0.96)
     fig_2_ax = fig_2.add_subplot(1, 1, 1)
     # 可视化traveled_path_1的曲率随路程的变化曲线
     traveled_path_1_cur_vis, = fig_2_ax.plot(traveled_path_1.points_dis_, traveled_path_1.points_curvature_, 'r')
