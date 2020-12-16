@@ -13,8 +13,10 @@ import os
 sys.path.append(os.getcwd())
 
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 from math import *
+import time
 import tools.common as common
 import global_path.cubic_spline as cubic_spline
 import path_planning.path_planning_in_frenet as path_planning_in_frenet
@@ -25,7 +27,7 @@ VEHICLE_WIDTH = 1.8  # 车辆的宽度[m]
 VEHICLE_LENGTH = 4.5  # 车辆的长度[m]
 VELOCITY = 5.0  # 车辆行驶速度[m/s]
 LOCAL_PLANNING_UPDATE_FREQUENCY = 10.0  # 局部规划更新频率[Hz]
-ANIMATE_ON = True  # 是否播放动画
+ANIMATE_ON = False  # 是否播放动画
 AREA = 25.0  # 动画窗口大小
 DISTANCE_TO_GOAL_THRESHOLD = 0.1  # 判断到达终点的距离阈值
 OBSTACLE_COST_WEIGHT = 1.0  # 路径选择中障碍物损失的权重
@@ -33,6 +35,18 @@ SMOOTH_COST_WEIGHT = 1.0  # 路径选择中平滑损失的权重
 CONSISTENCY_COST_WEIGHT = 0.0  # 路径选则中一致性损失的权重
 LATERAL_SAMPLING_GAP = 0.2  # 横向采样间隔
 LATERAL_SAMPLING_NUM = 20  # 横向采样总数量
+
+# 设置可视化参数
+del matplotlib.font_manager.weight_dict['roman']
+matplotlib.font_manager._rebuild()
+plt.rcParams['figure.dpi'] = 300
+# plt.rcParams['figure.subplot.top'] = 0.98
+# plt.rcParams['figure.subplot.bottom'] = 0.28
+# plt.rcParams['figure.subplot.left'] = 0.16
+# plt.rcParams['figure.subplot.right'] = 0.96
+plt.rcParams['font.family'] = "Times New Roman"
+plt.rcParams['font.size'] = 8
+plt.rcParams['lines.linewidth'] = 0.8
 
 # 路径选选择器
 class PathSelector:
@@ -149,6 +163,8 @@ def PlanningProcess(global_spline, init_point, goal_point, local_path_planner, o
     path_selector = PathSelector()
     # 开始进行规划
     while True:
+        # 记录开始时间
+        time_start = time.time()
         # 计算局部规划期望距离
         longitude_offset = expectPlanningDistance(VELOCITY)
         # 生成路径组
@@ -164,6 +180,9 @@ def PlanningProcess(global_spline, init_point, goal_point, local_path_planner, o
         local_path = local_path_set[local_path_index]
         # 记录规划的局部路径
         planned_path_recorder.append(local_path)
+        # 得到规划完成时间
+        time_end = time.time()
+        print("local planning time consume: ", time_end - time_start)
         # 计算局部规划路径终点与全局导航终点的距离
         min_distance_to_goal = float('inf')
         for path in local_path_set:
@@ -274,7 +293,8 @@ def test():
 
     # 进行可视化
     # 可视化行驶路径
-    fig_0 = plt.figure()
+    fig_0 = plt.figure(figsize=(3.45,2))
+    fig_0.subplots_adjust(left=0.28, right=0.98, bottom=0.28, top=0.98)
     fig_0_ax = fig_0.add_subplot(1, 1, 1)
     fig_0_ax.axis('equal')
     # 可视化全局导航路径
@@ -284,44 +304,46 @@ def test():
     # 可视化局部路径(hanyang)
     traveled_path_2_vis, = fig_0_ax.plot(traveled_path_2.points_x_, traveled_path_2.points_y_)
     # 可视化障碍物点
-    obstacles_vis, = fig_0_ax.plot(obstacles.transpose()[0], obstacles.transpose()[1], "xk")
+    obstacles_vis, = fig_0_ax.plot(obstacles.transpose()[0], obstacles.transpose()[1], "xk", markersize=0.8)
     # 添加网格
-    fig_0_ax.grid(b=True,which='major',axis='both',alpha= 0.5,color='skyblue',linestyle='--',linewidth=2)
+    fig_0_ax.grid(b=True,which='major',axis='both',alpha= 0.5,color='skyblue',linestyle='--',linewidth=0.6)
     # 添加label
-    fig_0_ax.set_xlabel('position[m]')
-    fig_0_ax.set_ylabel('position[m]')
+    fig_0_ax.set_xlabel('Position[m]')
+    fig_0_ax.set_ylabel('Position[m]')
     # 添加标注
-    fig_0_ax.legend([global_path_vis, traveled_path_1_vis, traveled_path_2_vis, obstacles_vis], ['global path', 'traveled path with method 1', 'traveled path with method 2', 'obstacles'], loc='upper right')
+    # fig_0_ax.legend([global_path_vis, traveled_path_1_vis, traveled_path_2_vis, obstacles_vis], ['global path', 'traveled path with method 1', 'traveled path with method 2', 'obstacles'], loc='upper right')
 
     # 可视化朝向随里程的变化
-    fig_1 = plt.figure()
+    fig_1 = plt.figure(figsize=(3.45,1.6))
+    fig_1.subplots_adjust(left=0.28, right=0.98, bottom=0.28, top=0.98)
     fig_1_ax = fig_1.add_subplot(1, 1, 1)
     # 可视化traveled_path_1的朝向随路程的变化曲线
     traveled_path_1_yaw_vis, = fig_1_ax.plot(traveled_path_1.points_dis_, traveled_path_1.points_yaw_, 'r')
     # 可视化traveled_path_2的朝向随路程的变化曲线
     traveled_path_2_yaw_vis, = fig_1_ax.plot(traveled_path_2.points_dis_, traveled_path_2.points_yaw_, 'b')
     # 添加标注
-    fig_1_ax.legend([traveled_path_1_yaw_vis, traveled_path_2_yaw_vis], ['traveled path 1 yaw', 'traveled path 2 yaw'], loc='upper right')
+    # fig_1_ax.legend([traveled_path_1_yaw_vis, traveled_path_2_yaw_vis], ['traveled path 1 yaw', 'traveled path 2 yaw'], loc='upper right')
     # 添加label
-    fig_1_ax.set_xlabel('distance[m]')
-    fig_1_ax.set_ylabel('yaw[rad]')
+    fig_1_ax.set_xlabel('Distance[m]')
+    fig_1_ax.set_ylabel('Yaw[rad]')
     # 添加标题
-    fig_1_ax.set_title('yaw profile over distance')
+    # fig_1_ax.set_title('yaw profile over distance')
 
     # 可视化曲率随里程的变化曲线
-    fig_2 = plt.figure()
+    fig_2 = plt.figure(figsize=(3.45,1.6))
+    fig_2.subplots_adjust(left=0.28, right=0.98, bottom=0.28, top=0.98)
     fig_2_ax = fig_2.add_subplot(1, 1, 1)
     # 可视化traveled_path_1的曲率随路程的变化曲线
     traveled_path_1_cur_vis, = fig_2_ax.plot(traveled_path_1.points_dis_, traveled_path_1.points_curvature_, 'r')
     # 可视化traveled_path_2的曲率随路程的变化曲线
     traveled_path_2_cur_vis, = fig_2_ax.plot(traveled_path_2.points_dis_, traveled_path_2.points_curvature_, 'b')
     # 添加标注
-    fig_2_ax.legend([traveled_path_1_cur_vis, traveled_path_2_cur_vis], ['traveled path 1 curvature', 'traveled path 2 curvature'], loc='upper right')
+    # fig_2_ax.legend([traveled_path_1_cur_vis, traveled_path_2_cur_vis], ['traveled path 1 curvature', 'traveled path 2 curvature'], loc='upper right')
     # 添加label
-    fig_2_ax.set_xlabel('distance[m]')
-    fig_2_ax.set_ylabel('curvature[rad/m]')
+    fig_2_ax.set_xlabel('Distance[m]')
+    fig_2_ax.set_ylabel('Curvature[rad/m]')
     # 添加标题
-    fig_2_ax.set_title('curvature profile over distance')
+    # fig_2_ax.set_title('curvature profile over distance')
 
     plt.show()
 

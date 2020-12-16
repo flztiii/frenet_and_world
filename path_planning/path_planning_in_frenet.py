@@ -39,8 +39,8 @@ class localPathPlanningFactory:
         assert(isinstance(global_spline, common.Navigation) and isinstance(init_point, common.CPoint))
         # 第一步，将init_point转化到frenet坐标系下
         frenet_init_point, init_corresponding_sample = self.__transPointToFrenet(global_spline, init_point)
-        print("frenet init point is ", frenet_init_point.x_, ", ", frenet_init_point.y_)
-        print("frenet offset is ", frenet_init_point.x_ - global_spline.calcArcLength(init_corresponding_sample))
+        # print("frenet init point is ", frenet_init_point.x_, ", ", frenet_init_point.y_)
+        # print("frenet offset is ", frenet_init_point.x_ - global_spline.calcArcLength(init_corresponding_sample))
         # 如果是debug模式,进行起始点可视化
         if self.debug_:
             # 初始化采样间隔
@@ -65,7 +65,7 @@ class localPathPlanningFactory:
         # 计算目标点对应的采样
         goal_corresponding_sample = global_spline.arcLengthToSample(frenet_goal_point.x_, init_corresponding_sample)
         assert(frenet_goal_point.x_ <= global_spline.getTotalLength())
-        print("frenet goal point is ", frenet_goal_point.x_, ", ", frenet_goal_point.y_)
+        # print("frenet goal point is ", frenet_goal_point.x_, ", ", frenet_goal_point.y_)
         # 如果是debug模式,对目标点进行可视化
         if self.debug_:
             # 计算对应坐标点
@@ -141,11 +141,11 @@ class localPathPlanningFactory:
                 world_path_y.append(world_cpoint.y_)
                 world_path_yaw.append(world_cpoint.theta_)
                 world_path_curvature.append(world_cpoint.curvature_)
-                if i == 0:
-                    print("init corresponding_sample", init_corresponding_sample, ", corresponding_sample ", corresponding_sample)
+                # if i == 0:
+                #     print("init corresponding_sample", init_corresponding_sample, ", corresponding_sample ", corresponding_sample)
             local_path = common.CPath(world_path_x, world_path_y, world_path_yaw, world_path_curvature)
             time_end = time.time()
-            print("frenet to world time consume: ", time_end - time_start)
+            # print("frenet to world time consume: ", time_end - time_start)
             return local_path
         else:
             # 第二种，先转化坐标，再利用坐标计算曲率
@@ -161,8 +161,8 @@ class localPathPlanningFactory:
                 world_path_x.append(world_cpoint.x_)
                 world_path_y.append(world_cpoint.y_)
                 offsets.append(frenet_path.points_x_[i] - global_spline.calcArcLength(current_sample))
-                if i == 0:
-                    print("init corresponding_sample", init_corresponding_sample, ", corresponding_sample ", corresponding_sample)
+                # if i == 0:
+                    # print("init corresponding_sample", init_corresponding_sample, ", corresponding_sample ", corresponding_sample)
             if self.debug_:
                 # 可视化offsets
                 plt.figure()

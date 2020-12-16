@@ -121,7 +121,7 @@ def test1():
 def test2():
     # 首先构建一个圆
     point_x, point_y, point_yaw, point_kappa = [], [], [], []
-    samples = np.linspace(-np.pi, np.pi, 10000)
+    samples = np.linspace(0, np.pi, 10000)
     radius = 20.0
     for sample in samples:
         point_x.append(radius * np.cos(sample))
@@ -132,31 +132,33 @@ def test2():
     global_path = common.CPath(point_x, point_y, point_yaw, point_kappa)
 
     # 第二步,给出在world系的坐标
-    corresponding_index = 0
-    print("sample ", samples[corresponding_index])
-    corresponding_reference_point = global_path.path_[corresponding_index]
-    offset = -3.1735
-    init_world_point = common.CPoint(corresponding_reference_point.x_ + offset, corresponding_reference_point.y_, -1.32521, 0.12111)
-    print("init_world_point: ", init_world_point.x_, ", ", init_world_point.y_, ", ", init_world_point.theta_, ", ", init_world_point.curvature_)
+    for d in range(-15,20,5):
+        corresponding_index = 0
+        print("sample ", samples[corresponding_index])
+        corresponding_reference_point = global_path.path_[corresponding_index]
+        offset = d
+        print("offset", d)
+        init_world_point = common.CPoint(corresponding_reference_point.x_ + offset, corresponding_reference_point.y_, corresponding_reference_point.theta_, 1.0/(radius+offset))
+        print("init_world_point: ", init_world_point.x_, ", ", init_world_point.y_, ", ", init_world_point.theta_, ", ", init_world_point.curvature_)
 
-    # 第三步,进行world到frenet的坐标转化
-    init_frenet_point = transPointToFrenet(init_world_point, global_path, corresponding_index)
-    print("init_frenet_point: ", init_frenet_point.x_, ", ", init_frenet_point.y_, ", ", init_frenet_point.theta_, ", ", init_frenet_point.curvature_)
+        # 第三步,进行world到frenet的坐标转化
+        init_frenet_point = transPointToFrenet(init_world_point, global_path, corresponding_index)
+        print("init_frenet_point: ", init_frenet_point.x_, ", ", init_frenet_point.y_, ", ", init_frenet_point.theta_, ", ", init_frenet_point.curvature_)
 
-    # 再转回到world系下
-    world_point_again = transPointToWorld(init_frenet_point, global_path, corresponding_index)
-    print("world_point_again: ", world_point_again.x_, ", ", world_point_again.y_, ", ", world_point_again.theta_, ", ", world_point_again.curvature_)
+        # 再转回到world系下
+        world_point_again = transPointToWorld(init_frenet_point, global_path, corresponding_index)
+        print("world_point_again: ", world_point_again.x_, ", ", world_point_again.y_, ", ", world_point_again.theta_, ", ", world_point_again.curvature_)
 
-    # 第四步进行可视化
-    # world系下的可视化
-    plt.figure()
-    plt.axis('equal')
-    # 可视化全局导航路径
-    plt.plot(point_x, point_y, ':')
-    plt.arrow(corresponding_reference_point.x_, corresponding_reference_point.y_, radius * np.cos(corresponding_reference_point.theta_), radius * np.sin(corresponding_reference_point.theta_), fc='r', ec='k', head_width=0.5, head_length=0.5)
-    # 可视化点
-    plt.arrow(init_world_point.x_, init_world_point.y_, np.cos(init_world_point.theta_), np.sin(init_world_point.theta_), fc='b', ec='k', head_width=0.5, head_length=0.5)
-    plt.show()
+        # 第四步进行可视化
+        # world系下的可视化
+        plt.figure()
+        plt.axis('equal')
+        # 可视化全局导航路径
+        plt.plot(point_x, point_y, ':')
+        plt.arrow(corresponding_reference_point.x_, corresponding_reference_point.y_, radius * np.cos(corresponding_reference_point.theta_), radius * np.sin(corresponding_reference_point.theta_), fc='r', ec='k', head_width=0.5, head_length=0.5)
+        # 可视化点
+        plt.arrow(init_world_point.x_, init_world_point.y_, np.cos(init_world_point.theta_), np.sin(init_world_point.theta_), fc='b', ec='k', head_width=0.5, head_length=0.5)
+        plt.show()
 
 
 if __name__ == "__main__":

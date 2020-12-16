@@ -77,7 +77,7 @@ class localPathPlanningFactory:
 
         # 第一步, 将当前位置转化到frenet坐标系下
         frenet_init_point, init_corresponding_sample =  self.__transPointToFrenet(global_spline, init_point)
-        print("init corresponding sample: ", init_corresponding_sample)
+        # print("init corresponding sample: ", init_corresponding_sample)
 
         # 第二步,在frenet坐标系下进行规划
         cubic_polynomial = CubicPolynomialWithBoundaryConstrains(frenet_init_point.x_, min(frenet_init_point.x_ + longitude_offset, global_spline.getTotalLength()), frenet_init_point.y_, lateral_offset, frenet_init_point.theta_)
@@ -225,20 +225,20 @@ def test():
     # 添加网格
     fig_1_ax.grid(b=True,which='major',axis='both',alpha= 0.5,color='skyblue',linestyle='--',linewidth=2)
     # 添加label
-    fig_1_ax.set_xlabel('position[m]')
-    fig_1_ax.set_ylabel('position[m]')
+    fig_1_ax.set_xlabel('Position[m]')
+    fig_1_ax.set_ylabel('Position[m]')
     # 添加标注
-    fig_1_ax.legend([global_path_vis, local_path_vis], ['global path', 'local path'], loc='upper right')
+    fig_1_ax.legend([global_path_vis, local_path_vis], ['Global path', 'Local path'], loc='upper right')
     # 绘制朝向随路程的变化曲线
     fig_2 = plt.figure()
     fig_2_ax = fig_2.add_subplot(1, 1, 1)
     # 可视化local_path的曲率随路程的变化曲线
     local_path_yaw_vis, = fig_2_ax.plot(local_path.points_dis_, local_path.points_yaw_)
     # 添加标注
-    fig_2_ax.legend([local_path_yaw_vis], ['yaw'], loc='upper right')
+    fig_2_ax.legend([local_path_yaw_vis], ['Yaw'], loc='upper right')
     # 添加label
-    fig_2_ax.set_xlabel('distance[m]')
-    fig_2_ax.set_ylabel('yaw[rad]')
+    fig_2_ax.set_xlabel('Distance[m]')
+    fig_2_ax.set_ylabel('Yaw[rad]')
     # 添加标题
     fig_2_ax.set_title('yaw profile over distance')
     # 绘制曲率随路程的变化曲线
@@ -247,12 +247,12 @@ def test():
     # 可视化local_path的曲率随路程的变化曲线
     local_path_cur_vis, = fig_3_ax.plot(local_path.points_dis_, local_path.points_curvature_)
     # 添加标注
-    fig_3_ax.legend([local_path_cur_vis], ['curvature'], loc='upper right')
+    fig_3_ax.legend([local_path_cur_vis], ['Curvature'], loc='upper right')
     # 添加label
-    fig_3_ax.set_xlabel('distance[m]')
-    fig_3_ax.set_ylabel('curvature[rad/m]')
+    fig_3_ax.set_xlabel('Distance[m]')
+    fig_3_ax.set_ylabel('Curvature[rad/m]')
     # 添加标题
-    fig_3_ax.set_title('curvature profile over distance')
+    fig_3_ax.set_title('Curvature profile over distance')
     plt.show()
 
 
