@@ -33,8 +33,8 @@ DISTANCE_TO_GOAL_THRESHOLD = 0.1  # 判断到达终点的距离阈值
 OBSTACLE_COST_WEIGHT = 1.0  # 路径选择中障碍物损失的权重
 SMOOTH_COST_WEIGHT = 1.0  # 路径选择中平滑损失的权重
 CONSISTENCY_COST_WEIGHT = 0.0  # 路径选则中一致性损失的权重
-LATERAL_SAMPLING_GAP = 0.2  # 横向采样间隔
-LATERAL_SAMPLING_NUM = 20  # 横向采样总数量
+LATERAL_SAMPLING_GAP = 0.4  # 横向采样间隔
+LATERAL_SAMPLING_NUM = 10  # 横向采样总数量
 
 # 设置可视化参数
 del matplotlib.font_manager.weight_dict['roman']
@@ -246,10 +246,7 @@ def traveledPathFormat(traveled_path_recorder):
     return path
 
 # 测试函数,沿全局导航从起点行驶到终点
-def test():
-    # 首先给出全局导航路点
-    waypoints_x = [0.0, 20.0, 0.0]
-    waypoints_y = [0.0, 20.0, 40.0]
+def test(waypoints_x, waypoints_y, obstacles):
     # 构建2d三次样条曲线
     global_spline = cubic_spline.CubicSpline2D(waypoints_x, waypoints_y)
     # 采样间隔
@@ -261,9 +258,6 @@ def test():
     point_kappa = global_spline.calcKappa(sample_s)
     # 构建全局导航路径
     global_path = common.CPath(point_x, point_y, point_yaw, point_kappa)
-
-    # 给出障碍物列表
-    obstacles = np.array([[7.7, 4.0], [10.0, 5.6], [16.7, 15.0], [18.3, 18.1], [13.5, 32.2], [10.2, 34.2]])
 
     # 给出起始位置和目标点
     init_point = global_spline.calcCPoint(global_spline.minSample())
@@ -293,16 +287,16 @@ def test():
 
     # 进行可视化
     # 可视化行驶路径
-    fig_0 = plt.figure(figsize=(3.45,2))
-    fig_0.subplots_adjust(left=0.12, right=0.98, bottom=0.18, top=0.96)
+    fig_0 = plt.figure(figsize=(3.45, 1.6))
+    fig_0.subplots_adjust(left=0.14, right=0.98, bottom=0.24, top=0.96)
     fig_0_ax = fig_0.add_subplot(1, 1, 1)
     fig_0_ax.axis('equal')
-    # 可视化全局导航路径
-    global_path_vis, = fig_0_ax.plot(point_x, point_y, ':')
     # 可视化局部路径(frenet)
     traveled_path_1_vis, = fig_0_ax.plot(traveled_path_1.points_x_, traveled_path_1.points_y_)
     # 可视化局部路径(hanyang)
     traveled_path_2_vis, = fig_0_ax.plot(traveled_path_2.points_x_, traveled_path_2.points_y_)
+    # 可视化全局导航路径
+    global_path_vis, = fig_0_ax.plot(point_x, point_y, ':')
     # 可视化障碍物点
     obstacles_vis, = fig_0_ax.plot(obstacles.transpose()[0], obstacles.transpose()[1], "xk", markersize=2)
     # 添加网格
@@ -311,21 +305,23 @@ def test():
     fig_0_ax.set_xlabel('Position[m]')
     fig_0_ax.set_ylabel('Position[m]')
     # 添加标注
-    # fig_0_ax.legend([global_path_vis, traveled_path_1_vis, traveled_path_2_vis, obstacles_vis], ['global path', 'traveled path with method 1', 'traveled path with method 2', 'obstacles'], loc='upper right')
+    fig_0_ax.legend([traveled_path_1_vis, traveled_path_2_vis], ['Proposed', 'Traditional'], loc='lower right')
 
     # 可视化朝向随里程的变化
     fig_1 = plt.figure(figsize=(3.45,1.6))
     fig_1.subplots_adjust(left=0.12, right=0.98, bottom=0.24, top=0.96)
     fig_1_ax = fig_1.add_subplot(1, 1, 1)
     # 可视化traveled_path_1的朝向随路程的变化曲线
-    traveled_path_1_yaw_vis, = fig_1_ax.plot(traveled_path_1.points_dis_, traveled_path_1.points_yaw_, 'r')
+    traveled_path_1_yaw_vis, = fig_1_ax.plot(traveled_path_1.points_dis_, traveled_path_1.points_yaw_)
     # 可视化traveled_path_2的朝向随路程的变化曲线
-    traveled_path_2_yaw_vis, = fig_1_ax.plot(traveled_path_2.points_dis_, traveled_path_2.points_yaw_, 'b')
+    traveled_path_2_yaw_vis, = fig_1_ax.plot(traveled_path_2.points_dis_, traveled_path_2.points_yaw_)
     # 添加标注
-    # fig_1_ax.legend([traveled_path_1_yaw_vis, traveled_path_2_yaw_vis], ['traveled path 1 yaw', 'traveled path 2 yaw'], loc='upper right')
+    fig_1_ax.legend([traveled_path_1_yaw_vis, traveled_path_2_yaw_vis], ['Proposed', 'Traditional'], bbox_to_anchor=(0.98, 0.4))
     # 添加label
     fig_1_ax.set_xlabel('Distance[m]')
     fig_1_ax.set_ylabel('Yaw[rad]')
+    # 添加网格
+    fig_1_ax.grid(b=True,which='major',axis='both',alpha= 0.5,color='skyblue',linestyle='--',linewidth=0.6)
     # 添加标题
     # fig_1_ax.set_title('yaw profile over distance')
 
@@ -334,18 +330,40 @@ def test():
     fig_2.subplots_adjust(left=0.15, right=0.98, bottom=0.24, top=0.96)
     fig_2_ax = fig_2.add_subplot(1, 1, 1)
     # 可视化traveled_path_1的曲率随路程的变化曲线
-    traveled_path_1_cur_vis, = fig_2_ax.plot(traveled_path_1.points_dis_, traveled_path_1.points_curvature_, 'r')
+    traveled_path_1_cur_vis, = fig_2_ax.plot(traveled_path_1.points_dis_, traveled_path_1.points_curvature_)
     # 可视化traveled_path_2的曲率随路程的变化曲线
-    traveled_path_2_cur_vis, = fig_2_ax.plot(traveled_path_2.points_dis_, traveled_path_2.points_curvature_, 'b')
+    traveled_path_2_cur_vis, = fig_2_ax.plot(traveled_path_2.points_dis_, traveled_path_2.points_curvature_)
     # 添加标注
-    # fig_2_ax.legend([traveled_path_1_cur_vis, traveled_path_2_cur_vis], ['traveled path 1 curvature', 'traveled path 2 curvature'], loc='upper right')
+    fig_2_ax.legend([traveled_path_1_cur_vis, traveled_path_2_cur_vis], ['Proposed', 'Traditional'], loc='lower right')
     # 添加label
     fig_2_ax.set_xlabel('Distance[m]')
     fig_2_ax.set_ylabel('Curvature[rad/m]')
+    # 添加网格
+    fig_2_ax.grid(b=True,which='major',axis='both',alpha= 0.5,color='skyblue',linestyle='--',linewidth=0.6)
     # 添加标题
     # fig_2_ax.set_title('curvature profile over distance')
 
     plt.show()
 
 if __name__ == "__main__":
-    test()
+    # # 首先给出全局导航路点
+    # waypoints_x = [0.0, 20.0, 0.0]
+    # waypoints_y = [0.0, 20.0, 40.0]
+    # # 给出障碍物列表
+    # obstacles = np.array([[7.7, 4.0], [10.0, 5.6], [16.7, 15.0], [18.3, 18.1], [13.5, 32.2], [10.2, 34.2]])
+    # 首先给出全局导航路点
+    # waypoints_x = [0.0, 20.0, 40.0, 60.0]
+    # waypoints_y = [0.0, 5.0, -5.0, 5.0]
+    # # 给出障碍物列表
+    # obstacles = np.array([[3.4, 2.5],[3.1, 3.1],[17.9, 4.2],[17.8, 5.4],[25.2, 2.2],[25.3, 3.1],[47.6, -3.5],[47.7, -4.2]])
+    # # 首先给出全局导航路点
+    # waypoints_x = [0.0, 20.0, 30.0, 40.0]
+    # waypoints_y = [0.0, 10.0, 10.0, 20.0]
+    # # 给出障碍物列表
+    # obstacles = np.array([[6.2, 4.6], [7.5, 5.6], [16.4, 8.9], [19.3, 8.7], [25.3, 10.4], [37.5, 15.4]])
+    # 首先给出全局导航路点
+    waypoints_x = [0.0, -10.0, 0.0]
+    waypoints_y = [0.0, 10.0, 20.0]
+    # 给出障碍物列表
+    obstacles = np.array([[-4.6,3.8], [-3.8, 4.3], [-5.3, 4.2], [-10.7, 10.6], [-10, 12.7], [-6.8, 16.3], [-3.6, 18]])
+    test(waypoints_x, waypoints_y, obstacles)
